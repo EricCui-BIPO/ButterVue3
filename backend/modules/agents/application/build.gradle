@@ -1,0 +1,69 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Agents Application Layer - Use cases and application services for AI chat and function calling'
+
+dependencies {
+    // Core frameworks
+    implementation project(':frameworks:domain.core')
+    implementation project(':frameworks:persistence.spring')
+
+    // Domain layer dependency
+    implementation project(':agents-domain')
+    // Frameworks dependency
+    implementation project(':frameworks:domain.core')
+
+    // Lombok for reducing boilerplate code
+    compileOnly "org.projectlombok:lombok:${lombokVersion}"
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+
+    // Logging
+    implementation 'org.slf4j:slf4j-api'
+
+    // Spring Context for @Component annotation
+    implementation 'org.springframework:spring-context'
+
+    // Spring Transaction for @Transactional
+    implementation 'org.springframework:spring-tx'
+
+    // Bean Validation for DTO validation
+    implementation "javax.validation:validation-api:${validationApiVersion}"
+
+    // Spring Web for SSE and HTTP
+    implementation 'org.springframework:spring-web'
+    implementation 'org.springframework:spring-webmvc'
+
+    // JSON processing
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+
+    // HTTP Client for BigModel API
+    implementation 'com.squareup.okhttp3:okhttp'
+    implementation 'com.squareup.okhttp3:okhttp-sse'
+
+    // Testing dependencies
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation 'org.mockito:mockito-core'
+    testImplementation 'org.mockito:mockito-junit-jupiter'
+    testImplementation 'org.assertj:assertj-core'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // Lombok for tests
+    testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
+    testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+}
+
+// Application layer should not depend on Spring Boot
+configurations.all {
+    exclude group: 'org.springframework.boot'
+    exclude group: 'org.springframework.data'
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events 'passed', 'skipped', 'failed'
+        exceptionFormat 'full'
+    }
+}

@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>I0Table 动态列槽功能演示</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .feature-header {
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #409eff;
+        }
+        .feature-header h1 {
+            color: #409eff;
+            margin: 0 0 10px 0;
+        }
+        .feature-header p {
+            color: #666;
+            margin: 0;
+            font-size: 16px;
+        }
+        .code-example {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+        }
+        .usage-steps {
+            margin: 20px 0;
+        }
+        .usage-steps h3 {
+            color: #333;
+            border-left: 4px solid #409eff;
+            padding-left: 10px;
+        }
+        .usage-steps ol {
+            padding-left: 20px;
+        }
+        .usage-steps li {
+            margin: 10px 0;
+            line-height: 1.6;
+        }
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .feature-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #28a745;
+        }
+        .feature-item h4 {
+            margin: 0 0 8px 0;
+            color: #28a745;
+        }
+        .feature-item p {
+            margin: 0;
+            color: #666;
+            font-size: 14px;
+        }
+        .example-config {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .example-config h4 {
+            margin: 0 0 10px 0;
+            color: #856404;
+        }
+        .scope-params {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .scope-params h4 {
+            margin: 0 0 10px 0;
+            color: #0c5460;
+        }
+        .scope-params table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        .scope-params th,
+        .scope-params td {
+            border: 1px solid #bee5eb;
+            padding: 8px;
+            text-align: left;
+        }
+        .scope-params th {
+            background: #b8daff;
+            color: #0c5460;
+        }
+        .compatibility-note {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .compatibility-note h4 {
+            margin: 0 0 10px 0;
+            color: #155724;
+        }
+        .highlight {
+            background: #fff3cd;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <div class="feature-header">
+            <h1>🎯 I0Table 动态列槽功能</h1>
+            <p>为 I0Table 组件添加的动态列槽功能，允许调用方为任何列自定义 UI 展示</p>
+        </div>
+
+        <div class="feature-list">
+            <div class="feature-item">
+                <h4>🔧 灵活配置</h4>
+                <p>支持自动生成槽名或自定义槽名，满足不同场景的需求</p>
+            </div>
+            <div class="feature-item">
+                <h4>📋 完整作用域</h4>
+                <p>提供丰富的槽作用域参数，包括行数据、列配置、原始值和格式化值</p>
+            </div>
+            <div class="feature-item">
+                <h4>🔄 向后兼容</h4>
+                <p>完全兼容现有的 actions 槽和格式化逻辑，无需修改现有代码</p>
+            </div>
+            <div class="feature-item">
+                <h4>🛡️ 类型安全</h4>
+                <p>完整的 TypeScript 类型支持，提供更好的开发体验</p>
+            </div>
+        </div>
+
+        <div class="usage-steps">
+            <h3>📖 使用方法</h3>
+            <ol>
+                <li>
+                    <strong>配置列槽</strong> - 在 <code>tableColumn</code> 配置中添加 <code>slot</code> 属性：
+                    <div class="code-example">
+const columns: TableColumn[] = [
+  {
+    name: '用户名',
+    prop: 'userName',
+    type: 'string',
+    slot: true, // 自动生成槽名: column-userName
+  },
+  {
+    name: '状态',
+    prop: 'status',
+    type: 'string',
+    slot: 'custom-status', // 自定义槽名
+  }
+]
+                    </div>
+                </li>
+                <li>
+                    <strong>使用列槽</strong> - 在模板中定义对应的槽：
+                    <div class="code-example">
+&lt;template #column-userName="{ row, value, formattedValue }"&gt;
+  &lt;div class="user-cell"&gt;
+    &lt;el-avatar :src="row.avatar" /&gt;
+    &lt;span&gt;{{ value }}&lt;/span&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;template #custom-status="{ value }"&gt;
+  &lt;el-tag :type="value === 'active' ? 'success' : 'danger'"&gt;
+    {{ value }}
+  &lt;/el-tag&gt;
+&lt;/template&gt;
+                    </div>
+                </li>
+            </ol>
+        </div>
+
+        <div class="example-config">
+            <h4>🎛️ 槽配置选项</h4>
+            <p><strong>slot: true</strong> - 自动生成槽名，格式为 <code>column-{prop}</code></p>
+            <div class="code-example">
+{
+  name: '用户名',
+  prop: 'userName',
+  slot: true  // 生成槽名: column-userName
+}
+            </div>
+            <p><strong>slot: string</strong> - 使用自定义槽名</p>
+            <div class="code-example">
+{
+  name: '状态',
+  prop: 'status',
+  slot: 'status-slot'  // 使用槽名: status-slot
+}
+            </div>
+            <p><strong>未配置 slot</strong> - 使用默认的格式化逻辑显示</p>
+        </div>
+
+        <div class="scope-params">
+            <h4>📦 槽作用域参数</h4>
+            <p>每个动态列槽都提供以下参数：</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>参数</th>
+                        <th>类型</th>
+                        <th>描述</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>row</code></td>
+                        <td><code>Record&lt;string, any&gt;</code></td>
+                        <td>当前行数据</td>
+                    </tr>
+                    <tr>
+                        <td><code>column</code></td>
+                        <td><code>TableColumn</code></td>
+                        <td>列配置对象</td>
+                    </tr>
+                    <tr>
+                        <td><code>value</code></td>
+                        <td><code>any</code></td>
+                        <td>单元格原始值</td>
+                    </tr>
+                    <tr>
+                        <td><code>formattedValue</code></td>
+                        <td><code>string</code></td>
+                        <td>格式化后的值</td>
+                    </tr>
+                    <tr>
+                        <td><code>index</code></td>
+                        <td><code>number</code></td>
+                        <td>行索引</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="compatibility-note">
+            <h4>🔄 向后兼容性</h4>
+            <p><strong>现有的 actions 槽</strong> - 保持不变，继续正常工作：</p>
+            <div class="code-example">
+&lt;template #actions="{ row, column, index }"&gt;
+  &lt;el-button @click="handleAction(row)"&gt;操作&lt;/el-button&gt;
+&lt;/template&gt;
+            </div>
+            <p><strong>默认渲染</strong> - 未配置 <code>slot</code> 的列继续使用默认的格式化逻辑</p>
+        </div>
+
+        <div class="usage-steps">
+            <h3>🎯 实际应用场景</h3>
+            <ol>
+                <li>
+                    <strong>状态标签</strong> - 为状态列添加颜色标签
+                    <div class="code-example">
+&lt;template #column-status="{ value }"&gt;
+  &lt;el-tag :type="getStatusType(value)"&gt;
+    {{ value }}
+  &lt;/el-tag&gt;
+&lt;/template&gt;
+                    </div>
+                </li>
+                <li>
+                    <strong>用户信息</strong> - 显示用户头像和详细信息
+                    <div class="code-example">
+&lt;template #column-userName="{ row, value }"&gt;
+  &lt;div class="user-info"&gt;
+    &lt;el-avatar :src="row.avatar" :size="32" /&gt;
+    &lt;div class="user-details"&gt;
+      &lt;div class="name"&gt;{{ value }}&lt;/div&gt;
+      &lt;div class="email"&gt;{{ row.email }}&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+                    </div>
+                </li>
+                <li>
+                    <strong>金额显示</strong> - 自定义金额格式和颜色
+                    <div class="code-example">
+&lt;template #column-amount="{ value, formattedValue }"&gt;
+  &lt;span class="amount" :class="{ negative: value < 0 }"&gt;
+    {{ formattedValue }}
+  &lt;/span&gt;
+&lt;/template&gt;
+                    </div>
+                </li>
+            </ol>
+        </div>
+
+        <div class="compatibility-note">
+            <h4>📁 实现文件</h4>
+            <p>动态列槽功能的实现包含以下文件：</p>
+            <ul>
+                <li><code>types.ts</code> - 扩展了 <code>TableColumn</code> 和 <code>I0TableSlots</code> 接口</li>
+                <li><code>index.vue</code> - 重构了列渲染逻辑，支持动态插槽检测</li>
+                <li><code>hooks/useColumnSlots.ts</code> - 列槽管理逻辑</li>
+                <li><code>utils/formatValue.ts</code> - 添加了列槽名称生成函数</li>
+                <li><code>__tests__/useColumnSlots.test.ts</code> - 核心逻辑单元测试</li>
+                <li><code>DYNAMIC_SLOTS.md</code> - 详细使用文档</li>
+            </ul>
+        </div>
+
+        <div class="feature-header">
+            <h2>✨ 功能完成</h2>
+            <p>动态列槽功能已经完全实现，提供了强大的自定义能力，同时保持了向后兼容性。现在开发者可以轻松地为任何列创建复杂的 UI 展示，满足各种业务需求。</p>
+        </div>
+    </div>
+</body>
+</html>

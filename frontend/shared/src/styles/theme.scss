@@ -1,0 +1,255 @@
+// ========================================
+// 主题变量定义
+// ========================================
+
+:root {
+  // 主要色彩
+  --primary: #3550e0;
+  --primary-foreground: #ffffff;
+
+  // 副主题色
+  --secondary: #ffd747;
+  --secondary-foreground: #000000;
+
+  // 背景色
+  --background: #ffffff;
+  --foreground: #212529;
+
+  // 边框色
+  --border: #dee2e6;
+
+  // 悬停色
+  --hover: #f8f9fa;
+
+  // 激活色
+  --active: #3550e0;
+  --active-foreground: #ffffff;
+
+  // 禁用色
+  --disabled: #adb5bd;
+  --disabled-background: #f8f9fa;
+  --disabled-border: #dee2e6;
+
+  // 成功色
+  --success: #22c55e;
+  --success-foreground: #ffffff;
+
+  // 警告色
+  --warning: #f59e0b;
+  --warning-foreground: #ffffff;
+
+  // 错误色
+  --error: #ef4444;
+  --error-foreground: #ffffff;
+
+  // 间距
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+
+  // 圆角
+  --radius-sm: 0.125rem;
+  --radius-md: 0.25rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+
+  // 字体
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+
+  // 阴影
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+  // Z-index
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-modal-backdrop: 1040;
+  --z-modal: 1050;
+  --z-popover: 1060;
+  --z-tooltip: 1070;
+}
+
+// ========================================
+// 基础样式重置
+// ========================================
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+body {
+  margin: 0;
+  font-family: inherit;
+  line-height: inherit;
+  color: var(--foreground);
+  background-color: var(--background);
+}
+
+// ========================================
+// 应用容器
+// ========================================
+
+#app {
+  height: 100vh;
+  font-family: inherit;
+}
+
+// ========================================
+// 通用工具类
+// ========================================
+
+// Flexbox 工具类
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+// 尺寸工具类
+.w-full {
+  width: 100%;
+}
+
+.h-full {
+  height: 100%;
+}
+
+.h-screen {
+  height: 100vh;
+}
+
+// 边距工具类
+.p-0 {
+  padding: 0;
+}
+
+.m-0 {
+  margin: 0;
+}
+
+// 边框工具类
+.border {
+  border: 1px solid var(--border);
+}
+
+.border-b {
+  border-bottom: 1px solid var(--border);
+}
+
+.border-r {
+  border-right: 1px solid var(--border);
+}
+
+// 背景色工具类
+.bg-background {
+  background-color: var(--background);
+}
+
+.bg-primary {
+  background-color: var(--primary);
+}
+
+.bg-hover {
+  background-color: var(--hover);
+}
+
+// 文本色工具类
+.text-foreground {
+  color: var(--foreground);
+}
+
+.text-primary {
+  color: var(--primary);
+}
+
+// 溢出处理
+.overflow-hidden {
+  overflow: hidden;
+}
+
+.overflow-auto {
+  overflow: auto;
+}
+
+// 定位
+.relative {
+  position: relative;
+}
+
+.fixed {
+  position: fixed;
+}
+
+.absolute {
+  position: absolute;
+}
+
+// 层级
+.z-30 {
+  z-index: 30;
+}
+
+.z-40 {
+  z-index: 40;
+}
+
+// 过渡动画
+.transition-all {
+  transition: all 0.3s ease-in-out;
+}
+
+.duration-300 {
+  transition-duration: 300ms;
+}
+
+// 变换
+.translate-x-0 {
+  transform: translateX(0);
+}
+
+.-translate-x-full {
+  transform: translateX(-100%);
+}
+
+// 光标
+.pointer-events-none {
+  pointer-events: none;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+// 背景模糊
+.backdrop-blur {
+  backdrop-filter: blur(4px);
+}

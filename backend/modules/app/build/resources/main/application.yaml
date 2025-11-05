@@ -1,0 +1,160 @@
+# Spring Boot Application Configuration
+spring:
+  application:
+    name: i0-backend-app
+
+  # MySQL Database Configuration
+  datasource:
+    url: jdbc:mysql://aws-iac-workio-mysql-dev.cqabh7iubbn0.rds.cn-northwest-1.amazonaws.com.cn:3306/i0_dev?useUnicode=true&characterEncoding=utf8&useSSL=true&serverTimezone=Asia/Shanghai
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: archegos_dev
+    password: cxSLyB2L
+
+  # HikariCP Connection Pool Configuration
+  hikari:
+    connection-timeout: 30000
+    maximum-pool-size: 20
+    minimum-idle: 5
+    idle-timeout: 600000
+    max-lifetime: 1800000
+    auto-commit: true
+    pool-name: I0HikariCP
+
+  # Flyway Configuration
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    validate-on-migrate: false
+    out-of-order: true
+    clean-disabled: true
+
+  # Disable Spring Cloud Config and Eureka
+  cloud:
+    config:
+      enabled: false
+    discovery:
+      enabled: false
+
+  # Error Handling
+  mvc:
+    throw-exception-if-no-handler-found: true
+  webflux:
+    add-mappings: false
+
+# Server Configuration
+server:
+  port: 8088
+  servlet:
+    context-path: /
+  error:
+    whitelabel:
+      enabled: false
+
+# Management Endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,env,beans
+  endpoint:
+    health:
+      show-details: always
+
+# Disable Eureka
+eureka:
+  client:
+    enabled: false
+
+# Logging Configuration
+logging:
+  level:
+    root: INFO
+    com.i0: DEBUG
+    org.flywaydb: DEBUG
+    javax.management: WARN
+    javax.management.remote: WARN
+    javax.management.remote.rmi: WARN
+    sun.rmi: WARN
+    sun.rmi.transport.tcp: WARN
+    sun.rmi.loader: WARN
+
+# AI Provider Configuration - 完全动态配置结构
+ai:
+  provider:
+    # 全局配置
+    active: siliconflow
+    timeout-seconds: 30
+    retry-enabled: true
+    max-retries: 3
+    # MCP模式
+    mcp:
+      enabled: true
+      servers:
+        - name: business-functions
+          type: business-functions
+          enabled: true
+
+
+    # 提供商配置 - 可以动态添加任意新的提供商
+    providers:
+      # SiliconFlow 配置
+      siliconflow:
+        api-url: https://api.siliconflow.cn/v1/chat/completions
+        api-key: sk-lmsyfympickckjrsbawesopbxluvwrsvphwquufrpjzavlzl
+        default-model: Qwen/Qwen2.5-72B-Instruct
+        timeout: 60
+        max-tokens: 4096
+        extra:
+          provider-name: SiliconFlow
+          region: default
+          version: v1
+
+      # BigModel 配置
+      bigmodel:
+        api-url: https://open.bigmodel.cn/api/paas/v4/chat/completions
+        api-key: 6000b5eb2b24c7abfa27c3053197b2e.O69l79m7xtlBDGUg
+        default-model: glm-4.6
+        timeout: 45
+        max-tokens: 8192
+        extra:
+          provider-name: BigModel
+          region: default
+          version: v4
+
+      # OpenAI 配置 - 新增第三方只需添加配置，无需修改代码
+      openai:
+        api-url: https://api.openai.com/v1/chat/completions
+        api-key: your-openai-api-key
+        default-model: gpt-4
+        timeout: 30
+        max-tokens: 4096
+        extra:
+          provider-name: OpenAI
+          organization: your-org-id
+          version: v1
+
+      # Claude/Anthropic 配置
+      claude:
+        api-url: https://api.anthropic.com/v1/messages
+        api-key: your-claude-api-key
+        default-model: claude-3-sonnet-20240229
+        timeout: 60
+        max-tokens: 4096
+        extra:
+          provider-name: Anthropic
+          region: us-east-1
+          version: 2023-06-01
+
+      # 自定义提供商示例
+      custom-provider:
+        api-url: https://your-custom-api.com/v1/chat
+        api-key: your-custom-api-key
+        default-model: your-model-name
+        timeout: 30
+        max-tokens: 2048
+        extra:
+          provider-name: CustomProvider
+          region: custom
+          custom-header: your-custom-value
+          rate-limit: 100

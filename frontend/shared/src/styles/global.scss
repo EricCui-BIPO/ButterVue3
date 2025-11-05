@@ -1,0 +1,148 @@
+/* ========================================
+   基础样式 - Base Styles
+   ======================================== */
+
+:root {
+  --container-width-max: 100%;
+  --container-width-large: 1800px;
+  --container-width-normal: 1200px;
+  --container-width-small: 1000px;
+}
+/* 全局基础样式 */
+body {
+  margin: 0;
+  background: #fff;
+  font-family: Nunito, sans-serif;
+}
+
+/* 页面头部样式 */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+
+  h1 {
+    padding: 0;
+    margin: 0;
+  }
+
+  p {
+    margin: 0;
+    padding: 0;
+  }
+}
+
+.operation-section {
+  display: flex;
+  justify-content: space-between;
+
+  .el-form-item {
+    margin-right: 10px;
+  }
+
+  .el-input,
+  .el-select {
+    width: 200px;
+  }
+}
+
+/* ========================================
+   头像组件 - Avatar Components
+   ======================================== */
+
+/* 头像容器 */
+.avatar-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 头像图片样式 */
+.avatar-image {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* 头像占位符样式 */
+.avatar-placeholder {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #3550e0;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+/* ========================================
+   布局组件 - Layout Components
+   ======================================== */
+
+/* 通用卡片头部样式 */
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+/* ========================================
+   选项组件 - Option Components
+   ======================================== */
+
+/* 选项内容布局 */
+.option-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.table-section{
+  border: 1px solid #e4e7ed;
+  background:#fff;
+}
+
+/* ========================================
+   操作样式 - Action Styles
+   ======================================== */
+
+/* 危险操作样式 */
+.danger-action {
+  color: var(--el-color-danger) !important;
+}
+
+
+
+/* ========================================
+   Charts
+   ======================================== */
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.chart-container {
+  background: var(--el-fill-color-blank);
+  border: 1px solid var(--el-border-color);
+  border-radius: 15px;
+  padding: 20px;
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s ease;
+}
+
+.chart-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--el-text-color-primary);
+  text-align: center;
+  flex-shrink: 0;
+}

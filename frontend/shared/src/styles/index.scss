@@ -1,0 +1,23 @@
+// ========================================
+// 共享样式主入口文件
+// ========================================
+
+// 导入主题样式
+@use './theme';
+
+// 导入组件样式
+@use './element-theme';
+@use './global';
+
+// ========================================
+// 应用级样式
+// ========================================
+
+#app {
+  font-family: inherit;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  height: 100vh;
+  color: var(--foreground);
+  background-color: var(--background);
+}

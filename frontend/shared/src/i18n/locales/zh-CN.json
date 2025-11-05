@@ -1,0 +1,69 @@
+{
+  "common": {
+    "home": "首页",
+    "login": "登录",
+    "logout": "退出",
+    "dashboard": "仪表板",
+    "profile": "个人资料",
+    "settings": "设置",
+    "save": "保存",
+    "cancel": "取消",
+    "confirm": "确认",
+    "delete": "删除",
+    "edit": "编辑",
+    "create": "创建",
+    "update": "更新",
+    "search": "搜索",
+    "loading": "加载中...",
+    "error": "错误",
+    "success": "成功",
+    "warning": "警告",
+    "info": "信息"
+  },
+  "auth": {
+    "login": "登录",
+    "logout": "退出登录",
+    "username": "用户名",
+    "password": "密码",
+    "rememberMe": "记住我",
+    "forgotPassword": "忘记密码？",
+    "loginSuccess": "登录成功",
+    "loginError": "登录失败",
+    "logoutSuccess": "退出成功",
+    "invalidCredentials": "用户名或密码错误"
+  },
+  "dashboard": {
+    "title": "仪表板",
+    "welcome": "欢迎使用",
+    "overview": "概览",
+    "statistics": "统计",
+    "recentActivity": "最近活动",
+    "quickActions": "快捷操作"
+  },
+  "profile": {
+    "title": "个人资料",
+    "basicInfo": "基本信息",
+    "contactInfo": "联系信息",
+    "changePassword": "修改密码",
+    "preferences": "偏好设置"
+  },
+  "settings": {
+    "title": "设置",
+    "general": "通用设置",
+    "account": "账户设置",
+    "privacy": "隐私设置",
+    "notifications": "通知设置",
+    "language": "语言设置",
+    "theme": "主题设置"
+  },
+  "errors": {
+    "notFound": "页面未找到",
+    "pageNotFound": "抱歉，您访问的页面不存在",
+    "goHome": "返回首页"
+  },
+  "theme": {
+    "light": "浅色",
+    "dark": "深色",
+    "auto": "自动"
+  }
+}

@@ -1,0 +1,478 @@
+package com.i0.talent.application.usecase;
+
+import com.i0.talent.application.dto.input.UpdateEmployeeInput;
+import com.i0.talent.application.dto.output.EmployeeOutput;
+import com.i0.talent.domain.entities.Employee;
+import com.i0.talent.domain.enums.DataLocation;
+import com.i0.talent.domain.enums.EmployeeStatus;
+import com.i0.talent.domain.exception.DomainException;
+import com.i0.talent.domain.repository.EmployeeRepository;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.time.LocalDate;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
+/**
+ * 更新员工UseCase测试
+ *
+ * 测试员工更新的业务逻辑
+ * 遵循TDD开发规范：Red-Green-Refactor
+ */
+@ExtendWith(MockitoExtension.class)
+@DisplayName("UpdateEmployeeUseCase测试")
+class UpdateEmployeeUseCaseTest {
+
+    @Mock
+    private EmployeeRepository employeeRepository;
+
+    private UpdateEmployeeUseCase updateEmployeeUseCase;
+
+    @BeforeEach
+    void setUp() {
+        updateEmployeeUseCase = new UpdateEmployeeUseCase(employeeRepository);
+    }
+
+    @Test
+    @DisplayName("应该成功更新员工基本信息")
+    void should_UpdateEmployee_When_ValidInputProvided() {
+        // Given
+        String employeeId = "emp-001";
+        Employee existingEmployee = Employee.reconstruct(
+                employeeId,
+                "张三",
+                "EMP001",
+                "北京",
+                "中国",
+                "zhangsan@example.com",
+                "技术部",
+                "软件工程师",
+                LocalDate.now().minusMonths(1),
+                null,
+                DataLocation.NINGXIA,
+                EmployeeStatus.ACTIVE,
+                "client-001"
+        );
+
+        UpdateEmployeeInput input = UpdateEmployeeInput.builder()
+                .id(employeeId)
+                .name("张三（更新）")
+                .employeeNumber("EMP001")
+                .workLocation("上海")
+                .nationality("中国")
+                .email("zhangsan.new@example.com")
+                .department("技术部")
+                .position("高级软件工程师")
+                .joinDate(LocalDate.now().minusMonths(1))
+                .dataLocation("NINGXIA")
+                .build();
+
+        Employee updatedEmployee = Employee.reconstruct(
+                employeeId,
+                input.getName(),
+                input.getEmployeeNumber(),
+                input.getWorkLocation(),
+                input.getNationality(),
+                input.getEmail(),
+                input.getDepartment(),
+                input.getPosition(),
+                input.getJoinDate(),
+                null,
+                DataLocation.NINGXIA,
+                EmployeeStatus.ACTIVE,
+                input.getClientId()
+        );
+
+        when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(existingEmployee));
+        when(employeeRepository.findByEmployeeNumber(input.getEmployeeNumber())).thenReturn(Optional.of(existingEmployee));
+        when(employeeRepository.save(any(Employee.class))).thenReturn(updatedEmployee);
+
+        // When
+        EmployeeOutput result = updateEmployeeUseCase.execute(input);
+
+        // Then
+        assertNotNull(result);
+        assertEquals(employeeId, result.getId());
+        assertEquals(input.getName(), result.getName());
+        assertEquals(input.getWorkLocation(), result.getWorkLocation());
+        assertEquals(input.getEmail(), result.getEmail());
+        assertEquals(input.getPosition(), result.getPosition());
+        assertEquals(EmployeeStatus.ACTIVE.name(), result.getStatus());
+        assertTrue(result.getActive());
+
+        verify(employeeRepository, times(1)).findById(employeeId);
+        verify(employeeRepository, times(1)).save(any(Employee.class));
+    }
+
+    @Test
+    @DisplayName("应该成功处理员工离职")
+    void should_HandleEmployeeTermination_When_LeaveDateProvided() {
+        // Given
+        String employeeId = "emp-002";
+        Employee existingEmployee = Employee.reconstruct(
+                employeeId,
+                "李四",
+                "EMP002",
+                "北京",
+                "中国",
+                "lisi@example.com",
+                "技术部",
+                "软件工程师",
+                LocalDate.now().minusMonths(6),
+                null,
+                DataLocation.NINGXIA,
+                EmployeeStatus.ACTIVE
+        );
+
+        LocalDate leaveDate = LocalDate.now().minusDays(1);
+        UpdateEmployeeInput input = UpdateEmployeeInput.builder()
+                .id(employeeId)
+                .name("李四")
+                .employeeNumber("EMP002")
+                .workLocation("北京")
+                .nationality("中国")
+                .email("lisi@example.com")
+                .department("技术部")
+                .position("软件工程师")
+                .joinDate(LocalDate.now().minusMonths(6))
+                .leaveDate(leaveDate)
+                .dataLocation("NINGXIA")
+                .build();
+
+        Employee terminatedEmployee = Employee.reconstruct(
+                employeeId,
+                input.getName(),
+                input.getEmployeeNumber(),
+                input.getWorkLocation(),
+                input.getNationality(),
+                input.getEmail(),
+                input.getDepartment(),
+                input.getPosition(),
+                input.getJoinDate(),
+                leaveDate,
+                DataLocation.NINGXIA,
+                EmployeeStatus.TERMINATED
+        );
+
+        when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(existingEmployee));
+        when(employeeRepository.findByEmployeeNumber(input.getEmployeeNumber())).thenReturn(Optional.of(existingEmployee));
+        when(employeeRepository.save(any(Employee.class))).thenReturn(terminatedEmployee);
+
+        // When
+        EmployeeOutput result = updateEmployeeUseCase.execute(input);
+
+        // Then
+        assertNotNull(result);
+        assertEquals(employeeId, result.getId());
+        assertEquals(leaveDate, result.getLeaveDate());
+        assertEquals(EmployeeStatus.TERMINATED.name(), result.getStatus());
+        assertFalse(result.getActive());
+
+        verify(employeeRepository, times(1)).findById(employeeId);
+        verify(employeeRepository, times(1)).save(any(Employee.class));
+    }
+
+    @Test
+    @DisplayName("应该成功恢复员工状态当移除离职日期")
+    void should_ReinstateEmployee_When_LeaveDateRemoved() {
+        // Given
+        String employeeId = "emp-003";
+        Employee existingEmployee = Employee.reconstruct(
+                employeeId,
+                "王五",
+                "EMP003",
+                "北京",
+                "中国",
+                "wangwu@example.com",
+                "技术部",
+                "软件工程师",
+                LocalDate.now().minusYears(1),
+                LocalDate.now().minusMonths(1),
+                DataLocation.NINGXIA,
+                EmployeeStatus.TERMINATED
+        );
+
+        UpdateEmployeeInput input = UpdateEmployeeInput.builder()
+                .id(employeeId)
+                .name("王五")
+                .employeeNumber("EMP003")
+                .workLocation("北京")
+                .nationality("中国")
+                .email("wangwu@example.com")
+                .department("技术部")
+                .position("软件工程师")
+                .joinDate(LocalDate.now().minusYears(1))
+                .leaveDate(null) // 移除离职日期
+                .dataLocation("NINGXIA")
+                .build();
+
+        Employee reinstatedEmployee = Employee.reconstruct(
+                employeeId,
+                input.getName(),
+                input.getEmployeeNumber(),
+                input.getWorkLocation(),
+                input.getNationality(),
+                input.getEmail(),
+                input.getDepartment(),
+                input.getPosition(),
+                input.getJoinDate(),
+                null,
+                DataLocation.NINGXIA,
+                EmployeeStatus.ACTIVE
+        );
+
+        when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(existingEmployee));
+        when(employeeRepository.findByEmployeeNumber(input.getEmployeeNumber())).thenReturn(Optional.of(existingEmployee));
+        when(employeeRepository.save(any(Employee.class))).thenReturn(reinstatedEmployee);
+
+        // When
+        EmployeeOutput result = updateEmployeeUseCase.execute(input);
+
+        // Then
+        assertNotNull(result);
+        assertEquals(employeeId, result.getId());
+        assertNull(result.getLeaveDate());
+        assertEquals(EmployeeStatus.ACTIVE.name(), result.getStatus());
+        assertTrue(result.getActive());
+
+        verify(employeeRepository, times(1)).findById(employeeId);
+        verify(employeeRepository, times(1)).save(any(Employee.class));
+    }
+
+    @Test
+    @DisplayName("应该抛出异常当员工不存在")
+    void should_ThrowException_When_EmployeeNotFound() {
+        // Given
+        String nonExistentId = "emp-999";
+        UpdateEmployeeInput input = UpdateEmployeeInput.builder()
+                .id(nonExistentId)
+                .name("不存在的员工")
+                .employeeNumber("EMP999")
+                .workLocation("北京")
+                .nationality("中国")
+                .email("nonexistent@example.com")
+                .department("技术部")
+                .position("软件工程师")
+                .joinDate(LocalDate.now().minusMonths(1))
+                .dataLocation("NINGXIA")
+                .build();
+
+        when(employeeRepository.findById(nonExistentId)).thenReturn(Optional.empty());
+
+        // When & Then
+        DomainException exception = assertThrows(
+                DomainException.class,
+                () -> updateEmployeeUseCase.execute(input)
+        );
+
+        assertEquals("员工不存在: " + nonExistentId, exception.getMessage());
+
+        verify(employeeRepository, times(1)).findById(nonExistentId);
+        verify(employeeRepository, never()).save(any(Employee.class));
+    }
+
+    @Test
+    @DisplayName("应该抛出异常当工号被其他员工使用")
+    void should_ThrowException_When_EmployeeNumberUsedByOther() {
+        // Given
+        String employeeId = "emp-001";
+        Employee existingEmployee = Employee.reconstruct(
+                employeeId,
+                "张三",
+                "EMP001",
+                "北京",
+                "中国",
+                "zhangsan@example.com",
+                "技术部",
+                "软件工程师",
+                LocalDate.now().minusMonths(1),
+                null,
+                DataLocation.NINGXIA,
+                EmployeeStatus.ACTIVE,
+                "client-001"
+        );
+
+        Employee otherEmployee = Employee.reconstruct(
+                "emp-002",
+                "李四",
+                "EMP002",
+                "上海",
+                "中国",
+                "lisi@example.com",
+                "市场部",
+                "市场专员",
+                LocalDate.now().minusMonths(2),
+                null,
+                DataLocation.NINGXIA,
+                EmployeeStatus.ACTIVE
+        );
+
+        UpdateEmployeeInput input = UpdateEmployeeInput.builder()
+                .id(employeeId)
+                .name("张三")
+                .employeeNumber("EMP002") // 使用其他员工的工号
+                .workLocation("北京")
+                .nationality("中国")
+                .email("zhangsan@example.com")
+                .department("技术部")
+                .position("软件工程师")
+                .joinDate(LocalDate.now().minusMonths(1))
+                .dataLocation("NINGXIA")
+                .build();
+
+        when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(existingEmployee));
+        when(employeeRepository.findByEmployeeNumber("EMP002")).thenReturn(Optional.of(otherEmployee));
+
+        // When & Then
+        DomainException exception = assertThrows(
+                DomainException.class,
+                () -> updateEmployeeUseCase.execute(input)
+        );
+
+        assertEquals("员工工号已被其他员工使用: " + input.getEmployeeNumber(), exception.getMessage());
+
+        verify(employeeRepository, times(1)).findById(employeeId);
+        verify(employeeRepository, times(1)).findByEmployeeNumber("EMP002");
+        verify(employeeRepository, never()).save(any(Employee.class));
+    }
+
+    @Test
+    @DisplayName("应该抛出异常当离职日期早于入职日期")
+    void should_ThrowException_When_LeaveDateBeforeJoinDate() {
+        // Given
+        String employeeId = "emp-004";
+        Employee existingEmployee = Employee.reconstruct(
+                employeeId,
+                "赵六",
+                "EMP004",
+                "北京",
+                "中国",
+                "zhaoliu@example.com",
+                "技术部",
+                "软件工程师",
+                LocalDate.now().minusMonths(3),
+                null,
+                DataLocation.NINGXIA,
+                EmployeeStatus.ACTIVE
+        );
+
+        LocalDate invalidLeaveDate = LocalDate.now().minusMonths(4); // 早于入职日期
+        UpdateEmployeeInput input = UpdateEmployeeInput.builder()
+                .id(employeeId)
+                .name("赵六")
+                .employeeNumber("EMP004")
+                .workLocation("北京")
+                .nationality("中国")
+                .email("zhaoliu@example.com")
+                .department("技术部")
+                .position("软件工程师")
+                .joinDate(LocalDate.now().minusMonths(3))
+                .leaveDate(invalidLeaveDate)
+                .dataLocation("NINGXIA")
+                .build();
+
+        when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(existingEmployee));
+        when(employeeRepository.findByEmployeeNumber(input.getEmployeeNumber())).thenReturn(Optional.of(existingEmployee));
+
+        // When & Then
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> updateEmployeeUseCase.execute(input)
+        );
+
+        assertEquals("离职日期不能早于入职日期", exception.getMessage());
+
+        verify(employeeRepository, times(1)).findById(employeeId);
+        verify(employeeRepository, never()).save(any(Employee.class));
+    }
+
+    @Test
+    @DisplayName("应该抛出异常当输入为null")
+    void should_ThrowException_When_InputIsNull() {
+        // When & Then
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> updateEmployeeUseCase.execute(null)
+        );
+
+        assertEquals("更新员工参数不能为空", exception.getMessage());
+
+        verify(employeeRepository, never()).findById(anyString());
+        verify(employeeRepository, never()).save(any(Employee.class));
+    }
+
+    @Test
+    @DisplayName("应该允许更新员工为相同工号")
+    void should_AllowUpdateWithSameEmployeeNumber() {
+        // Given
+        String employeeId = "emp-005";
+        Employee existingEmployee = Employee.reconstruct(
+                employeeId,
+                "钱七",
+                "EMP005",
+                "北京",
+                "中国",
+                "qianqi@example.com",
+                "技术部",
+                "软件工程师",
+                LocalDate.now().minusMonths(2),
+                null,
+                DataLocation.NINGXIA,
+                EmployeeStatus.ACTIVE
+        );
+
+        UpdateEmployeeInput input = UpdateEmployeeInput.builder()
+                .id(employeeId)
+                .name("钱七（更新）")
+                .employeeNumber("EMP005") // 相同工号
+                .workLocation("上海")
+                .nationality("中国")
+                .email("qianqi.new@example.com")
+                .department("技术部")
+                .position("高级软件工程师")
+                .joinDate(LocalDate.now().minusMonths(2))
+                .dataLocation("NINGXIA")
+                .build();
+
+        Employee updatedEmployee = Employee.reconstruct(
+                employeeId,
+                input.getName(),
+                input.getEmployeeNumber(),
+                input.getWorkLocation(),
+                input.getNationality(),
+                input.getEmail(),
+                input.getDepartment(),
+                input.getPosition(),
+                input.getJoinDate(),
+                null,
+                DataLocation.NINGXIA,
+                EmployeeStatus.ACTIVE,
+                input.getClientId()
+        );
+
+        when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(existingEmployee));
+        when(employeeRepository.findByEmployeeNumber(input.getEmployeeNumber())).thenReturn(Optional.of(existingEmployee));
+        when(employeeRepository.save(any(Employee.class))).thenReturn(updatedEmployee);
+
+        // When
+        EmployeeOutput result = updateEmployeeUseCase.execute(input);
+
+        // Then
+        assertNotNull(result);
+        assertEquals(employeeId, result.getId());
+        assertEquals(input.getName(), result.getName());
+        assertEquals(input.getWorkLocation(), result.getWorkLocation());
+
+        verify(employeeRepository, times(1)).findById(employeeId);
+        verify(employeeRepository, times(1)).save(any(Employee.class));
+    }
+}

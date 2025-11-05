@@ -1,0 +1,68 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Location Gateway Layer - Controllers, repositories, and external integrations'
+
+jar {
+    enabled = true
+}
+
+dependencies {
+    // Core frameworks
+    implementation project(':frameworks:domain.core')
+    implementation project(':frameworks:persistence.spring')
+
+    // 依赖同一domain的其他层
+    implementation project(':location-domain')
+    implementation project(':location-application')
+
+    // Spring Boot Web
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    
+    // Spring Data Database
+    implementation "com.baomidou:mybatis-plus-boot-starter:${mybatisPlusVersion}"
+    runtimeOnly "mysql:mysql-connector-java:${mysqlConnectorVersion}"
+    
+    // Spring Cloud
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+    implementation 'org.springframework.cloud:spring-cloud-starter-config'
+    implementation 'org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j'
+    
+    // JSON处理
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+    
+    // 基础工具库
+    implementation 'org.apache.commons:commons-lang3'
+    
+    // Lombok for reducing boilerplate code
+    compileOnly "org.projectlombok:lombok:${lombokVersion}"
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+    
+    // 日志
+    implementation 'org.slf4j:slf4j-api'
+    
+    // 测试依赖
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.cloud:spring-cloud-contract-wiremock'
+    testImplementation 'org.testcontainers:junit-jupiter'
+    testImplementation 'org.testcontainers:mysql'
+    testImplementation 'com.h2database:h2'
+    
+    // Lombok for tests
+    testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
+    testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+}
+
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events 'passed', 'skipped', 'failed'
+        exceptionFormat 'full'
+    }
+}

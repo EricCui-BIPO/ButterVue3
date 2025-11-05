@@ -1,0 +1,36 @@
+
+plugins {
+    id 'io.spring.dependency-management'
+}
+
+dependencyManagement {
+    imports {
+        mavenBom("org.springframework.boot:spring-boot-dependencies:${springBootVersion}")
+        mavenBom("org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}")
+        mavenBom("org.testcontainers:testcontainers-bom:${testcontainersVersion}")
+    }
+}
+
+dependencies {
+    testImplementation("net.java.dev.jna:jna:5.9.0")
+    implementation("com.alibaba:easyexcel:4.0.3") {
+        exclude group: 'commons-io', module: 'commons-io'
+    }
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+    maven {
+        url "http://47.100.99.87:8081/repository/maven-public/"
+        credentials {
+            username = 'iac_dev'
+            password = 'iac@123'
+        }
+        allowInsecureProtocol true
+    }
+}
+
+configurations.all {
+    exclude group: 'com.vaadin.external.google', module: 'android-json'
+}

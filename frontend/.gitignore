@@ -1,0 +1,65 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Environment files
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Cache directories
+.cache
+.temp
+.vite
+.nyc_output
+coverage
+
+# Build outputs
+*.tsbuildinfo
+
+# Test coverage
+coverage
+.nyc_output
+
+# E2E Testing (Playwright)
+playwright-report/
+test-results/
+
+# E2E Testing Reports (Cucumber & Allure)
+tests/e2e/reports/
+tests/e2e/reports/allure-results/
+tests/e2e/reports/allure-report/
+tests/e2e/reports/test-results/
+allure-results/
+screenshots/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

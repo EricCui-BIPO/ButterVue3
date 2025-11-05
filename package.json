@@ -1,0 +1,31 @@
+{
+  "name": "i0-project",
+  "version": "1.0.0",
+  "description": "I0 项目根目录配置 - 快捷启动脚本",
+  "scripts": {
+    "start:backend": "cd backend && ./gradlew :modules:app:bootRun",
+    "start:frontend": "cd frontend && yarn dev",
+    "start:client": "cd frontend && yarn dev:client",
+    "start:service": "cd frontend && yarn dev:service",
+    "start:admin": "cd frontend && yarn dev:admin",
+    "start:talent": "cd frontend && yarn dev:talent"
+  },
+  "keywords": [
+    "i0",
+    "vue",
+    "spring-boot",
+    "monorepo"
+  ],
+  "author": "I0 Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=8.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/i0-project.git"
+  },
+  "devDependencies": {},
+  "dependencies": {}
+}

@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//Users/sky/workspace/AI/I0/backend/modules/agents/application/src/main/java/com/i0/agents/application/usecases/**)",
+      "Read(//Users/sky/workspace/AI/I0/**)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

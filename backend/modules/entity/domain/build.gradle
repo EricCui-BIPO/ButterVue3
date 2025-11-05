@@ -1,0 +1,46 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Entity Domain Layer - Core business logic and entities'
+
+dependencies {
+    // 基础工具库
+    implementation 'org.apache.commons:commons-lang3'
+
+    // Core domain framework
+    implementation project(':frameworks:domain.core')
+    
+    // Lombok for reducing boilerplate code
+    compileOnly "org.projectlombok:lombok:${lombokVersion}"
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+    
+    // 日志
+    implementation 'org.slf4j:slf4j-api'
+    
+    // 测试依赖
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation 'org.mockito:mockito-core'
+    testImplementation 'org.mockito:mockito-junit-jupiter'
+    testImplementation 'org.assertj:assertj-core'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    
+    // Lombok for tests
+    testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
+    testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+}
+
+// 确保domain层不依赖Spring框架
+configurations.all {
+    exclude group: 'org.springframework'
+    exclude group: 'org.springframework.boot'
+    exclude group: 'org.springframework.data'
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events 'passed', 'skipped', 'failed'
+        exceptionFormat 'full'
+    }
+}

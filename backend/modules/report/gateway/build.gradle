@@ -1,0 +1,57 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Report Gateway Layer - Controllers and repository implementations for reporting system'
+
+dependencies {
+    // Core frameworks
+    implementation project(':frameworks:domain.core')
+    implementation project(':frameworks:persistence.spring')
+
+    // 依赖同一模块的domain和application层
+    implementation project(':report-domain')
+    implementation project(':report-application')
+
+    // Spring Boot Web
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    // MyBatis Plus
+    implementation "com.baomidou:mybatis-plus-boot-starter:${mybatisPlusVersion}"
+
+    // 数据库
+    runtimeOnly "mysql:mysql-connector-java:${mysqlConnectorVersion}"
+    runtimeOnly 'com.h2database:h2'
+
+    // JSON处理
+    implementation 'com.fasterxml.jackson.core:jackson-core'
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+
+    // Lombok
+    compileOnly "org.projectlombok:lombok:${lombokVersion}"
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+
+    // 日志
+    implementation 'org.slf4j:slf4j-api'
+
+    // 测试依赖
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation 'org.mockito:mockito-core'
+    testImplementation 'org.mockito:mockito-junit-jupiter'
+    testImplementation 'org.assertj:assertj-core'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // Lombok for tests
+    testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
+    testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events 'passed', 'skipped', 'failed'
+        exceptionFormat 'full'
+    }
+}

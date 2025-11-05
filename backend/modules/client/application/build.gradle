@@ -1,0 +1,58 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Tenant Application Layer - Use cases and application services'
+
+dependencies {
+    // Core frameworks
+    implementation project(':frameworks:domain.core')
+    implementation project(':frameworks:persistence.spring')
+
+    // 依赖同一domain的domain层
+    implementation project(':client-domain')
+    
+    // 基础工具库
+    implementation 'org.apache.commons:commons-lang3'
+    
+    // Lombok for reducing boilerplate code
+    compileOnly "org.projectlombok:lombok:${lombokVersion}"
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+    
+    // 日志
+    implementation 'org.slf4j:slf4j-api'
+    
+    // Spring Context for @Component annotation
+    implementation 'org.springframework:spring-context'
+    
+    // Spring Transaction for @Transactional annotation
+    implementation 'org.springframework:spring-tx'
+    
+    // Bean Validation for DTO validation
+    implementation "javax.validation:validation-api:${validationApiVersion}"
+    
+    // 测试依赖
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation 'org.mockito:mockito-core'
+    testImplementation 'org.mockito:mockito-junit-jupiter'
+    testImplementation 'org.assertj:assertj-core'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    
+    // Lombok for tests
+    testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
+    testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+}
+
+// 确保application层不依赖gateway层
+configurations.all {
+    exclude group: 'org.springframework.boot'
+    exclude group: 'org.springframework.data'
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events 'passed', 'skipped', 'failed'
+        exceptionFormat 'full'
+    }
+}

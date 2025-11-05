@@ -1,0 +1,86 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Agents Gateway Layer - Controllers, repositories, and external integrations for AI chat and function calling'
+
+jar {
+    enabled = true
+}
+
+dependencies {
+    // Core frameworks
+    implementation project(':frameworks:domain.core')
+    implementation project(':frameworks:persistence.spring')
+
+    // Domain and Application layer dependencies
+    implementation project(':agents-domain')
+    implementation project(':agents-application')
+
+    // Spring Boot Web
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+    // Spring Data JPA & Database
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation "com.baomidou:mybatis-plus-boot-starter:${mybatisPlusVersion}"
+    runtimeOnly "mysql:mysql-connector-java:${mysqlConnectorVersion}"
+
+    // Spring Cloud
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+    implementation 'org.springframework.cloud:spring-cloud-starter-config'
+    implementation 'org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j'
+
+    // JSON processing
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+
+    // HTTP Client for BigModel API
+    implementation 'com.squareup.okhttp3:okhttp'
+    implementation 'com.squareup.okhttp3:okhttp-sse'
+
+    // Cross-domain call - Entity module dependency
+    implementation project(':entity-application')
+    implementation project(':entity-domain')
+
+    // Cross-domain call - Talent module dependency
+    implementation project(':talent-application')
+    implementation project(':talent-domain')
+
+    // Cross-domain call - Location module dependency
+    implementation project(':location-application')
+    implementation project(':location-domain')
+
+    // Cross-domain call - Client module dependency
+    implementation project(':client-application')
+    implementation project(':client-domain')
+
+    // Frameworks dependency
+    implementation project(':frameworks:domain.core')
+
+    // Lombok for reducing boilerplate code
+    compileOnly "org.projectlombok:lombok:${lombokVersion}"
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+
+    // Logging
+    implementation 'org.slf4j:slf4j-api'
+
+    // Testing dependencies
+    testImplementation 'org.springframework.cloud:spring-cloud-contract-wiremock'
+    testImplementation 'org.testcontainers:junit-jupiter'
+    testImplementation 'org.testcontainers:mysql'
+
+    // Lombok for tests
+    testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
+    testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events 'passed', 'skipped', 'failed'
+        exceptionFormat 'full'
+    }
+}

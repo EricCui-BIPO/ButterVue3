@@ -1,0 +1,91 @@
+plugins {
+    id 'org.springframework.boot'
+}
+
+description = 'Application Main Entry Point'
+
+dependencies {
+    // 依赖各个gateway模块
+    implementation project(':entity-gateway')
+    implementation project(':location-gateway')
+    implementation project(':service-gateway')
+    implementation project(':client-gateway')
+    implementation project(':talent-gateway')
+    implementation project(':report-gateway')
+    implementation project(':agents-gateway')
+
+    // 核心框架依赖
+    implementation project(':frameworks:domain.core')
+    
+    // 添加domain模块依赖以支持DomainException
+    implementation project(':talent-domain')
+    implementation project(':agents-domain')
+
+    // Spring Boot基础依赖
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation "org.flywaydb:flyway-core:${flywayVersion}"
+    implementation "org.flywaydb:flyway-mysql:${flywayVersion}"
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+    implementation "org.mybatis.spring.boot:mybatis-spring-boot-starter:${mybatisSpringBootVersion}"
+    implementation "com.baomidou:mybatis-plus-boot-starter:${mybatisPlusVersion}"
+    runtimeOnly "mysql:mysql-connector-java:${mysqlConnectorVersion}"
+
+    
+    // Spring Cloud - temporarily disabled for debugging
+    // implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+    // implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+    // implementation 'org.springframework.cloud:spring-cloud-starter-config'
+    // implementation 'org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j'
+
+    // 基础工具库
+    // 日志
+    implementation 'org.springframework.boot:spring-boot-starter-logging'
+
+    // 基础工具库
+    implementation 'org.apache.commons:commons-lang3'
+
+    // Lombok
+    compileOnly "org.projectlombok:lombok:${lombokVersion}"
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+
+    // 测试依赖
+    // Domain和Application层测试依赖
+    testImplementation project(':frameworks:domain.core')
+    testImplementation project(':entity-application')
+    testImplementation project(':entity-domain')
+    testImplementation project(':service-application')
+    testImplementation project(':service-domain')
+    testImplementation project(':location-application')
+    testImplementation project(':location-domain')
+    testImplementation project(':client-application')
+    testImplementation project(':client-domain')
+    testImplementation project(':talent-application')
+    testImplementation project(':talent-domain')
+    testImplementation project(':report-application')
+    testImplementation project(':report-domain')
+    testImplementation project(':agents-application')
+    testImplementation project(':agents-domain')
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-validation'
+    testImplementation 'org.springframework.cloud:spring-cloud-contract-wiremock'
+    testImplementation 'org.testcontainers:junit-jupiter'
+    testImplementation 'org.testcontainers:mysql'
+    testImplementation 'com.h2database:h2'
+    testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
+    testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+}
+
+
+
+springBoot {
+    mainClass = 'com.i0.app.Application'
+}
+
+test {
+    useJUnitPlatform()
+}

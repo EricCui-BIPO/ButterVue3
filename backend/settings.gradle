@@ -1,0 +1,26 @@
+rootProject.name = 'I0-backend'
+
+file("modules").eachDir { moduleDir ->
+    moduleDir.eachDir { subModuleDir ->
+        if (!new File(subModuleDir, "build.gradle").exists()) return
+        def projectName = "${moduleDir.name}-${subModuleDir.name}"
+        include projectName
+        project(":${projectName}").projectDir = subModuleDir
+    }
+}
+
+if (file('frameworks').exists()) {
+    file('frameworks').eachDir { moduleDir ->
+        def hasGroovy = new File(moduleDir, 'build.gradle').exists()
+        def hasKts   = new File(moduleDir, 'build.gradle.kts').exists()
+        if (!(hasGroovy || hasKts)) return
+
+        def path = ":frameworks:${moduleDir.name}"
+        include path
+        project(path).projectDir = moduleDir
+    }
+}
+
+
+
+include ":modules:app"

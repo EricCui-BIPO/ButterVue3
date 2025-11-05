@@ -1,0 +1,45 @@
+plugins {
+    id 'java-library'
+}
+
+group = 'com.i0'
+version = '1.0.0'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // 依赖domain.core框架
+    api project(':frameworks:domain.core')
+    
+    // Spring Data依赖
+    api 'org.springframework.data:spring-data-commons:2.7.18'
+    
+    // MyBatis-Plus依赖
+    api "com.baomidou:mybatis-plus-core:${mybatisPlusVersion}"
+    api 'org.springframework:spring-context:5.3.27'
+    
+    // Lombok依赖
+    compileOnly "org.projectlombok:lombok:${lombokVersion}"
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+    
+    // Jackson JSON序列化依赖
+    api 'com.fasterxml.jackson.core:jackson-annotations:2.13.5'
+    testImplementation 'com.fasterxml.jackson.core:jackson-databind:2.13.5'
+    
+    // 测试依赖
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.8.2'
+    testImplementation 'org.assertj:assertj-core:3.22.0'
+    testImplementation 'org.mockito:mockito-core:4.6.1'
+    testImplementation 'org.mockito:mockito-junit-jupiter:4.6.1'
+}
+
+test {
+    useJUnitPlatform()
+}

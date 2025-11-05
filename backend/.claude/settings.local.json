@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./gradlew:*)",
+      "Bash(timeout:*)",
+      "Bash(pkill:*)",
+      "Bash(java:*)",
+      "Bash(curl:*)",
+      "Bash(jar:*)",
+      "Bash(cat:*)",
+      "Bash(mysql:*)",
+      "Bash(lsof:*)",
+      "Bash(kill:*)",
+      "Bash(find:*)",
+      "Bash(mvn test:*)",
+      "Bash(gradle test:*)",
+      "Read(//Users/yanchenyang/Project/I0/docs/backend/**)",
+      "Read(//Users/yanchenyang/Project/I0/**)",
+      "Bash(../../../../gradlew:*)",
+      "Bash(../../../gradlew:*)",
+      "Read(//Users/sky/workspace/AI/I0/**)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

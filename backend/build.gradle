@@ -1,0 +1,91 @@
+plugins {
+    id 'java'
+    id 'jacoco'
+    id 'org.springframework.boot' version "${springBootVersion}" apply false
+    id 'io.spring.dependency-management' version "${springDependencyManagementVersion}" apply false
+}
+
+allprojects {
+    group = 'com.i0'
+    version = '1.0.0-SNAPSHOT'
+
+    repositories {
+        mavenCentral()
+        maven { url 'https://repo.spring.io/milestone' }
+        maven { url 'https://repo.spring.io/snapshot' }
+    }
+}
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'jacoco'
+    apply plugin: 'version-control-domain'
+
+    java {
+        sourceCompatibility = '11'
+        targetCompatibility = '11'
+    }
+
+    compileJava {
+        options.encoding = 'UTF-8'
+    }
+
+    test {
+        useJUnitPlatform()
+        finalizedBy jacocoTestReport
+    }
+
+    jacocoTestReport {
+        dependsOn test
+        reports {
+            xml.required = true
+            html.required = true
+        }
+    }
+
+    jacoco {
+        toolVersion = "${jacocoVersion}"
+    }
+
+    dependencies {
+        implementation "org.slf4j:slf4j-api:${slf4jVersion}"
+        implementation "org.apache.commons:commons-lang3:${commonsLang3Version}"
+        implementation "com.google.guava:guava:${guavaVersion}"
+
+        testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
+        testImplementation "org.mockito:mockito-core:${mockitoVersion}"
+        testImplementation "org.mockito:mockito-junit-jupiter:${mockitoVersion}"
+        testImplementation "org.assertj:assertj-core:${assertjVersion}"
+        testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    }
+
+    test {
+        useJUnitPlatform()
+        testLogging {
+            events 'passed', 'skipped', 'failed'
+        }
+    }
+}
+
+task testReport(type: TestReport) {
+    destinationDir = file("$buildDir/reports/tests")
+    reportOn subprojects*.test
+}
+
+task jacocoRootReport(type: JacocoReport) {
+    dependsOn = subprojects*.test
+    additionalSourceDirs = files(subprojects*.sourceSets*.main*.allSource)
+    sourceDirectories = files(subprojects*.sourceSets*.main*.allSource)
+    classDirectories = files(subprojects*.sourceSets*.main*.output)
+    executionData = files(subprojects*.jacocoTestReport*.executionData)
+
+    reports {
+        xml.required = true
+        html.required = true
+        csv.required = false
+    }
+
+    onlyIf = {
+        true
+    }
+}

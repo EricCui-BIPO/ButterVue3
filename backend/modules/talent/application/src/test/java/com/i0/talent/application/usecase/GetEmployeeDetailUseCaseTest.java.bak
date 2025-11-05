@@ -1,0 +1,413 @@
+package com.i0.talent.application.usecase;
+
+import com.i0.talent.application.dto.output.EmployeeDetailOutput;
+import com.i0.talent.application.service.AccessControlService;
+import com.i0.talent.application.service.LegalComplianceService;
+import com.i0.talent.domain.entities.Employee;
+import com.i0.talent.domain.enums.DataLocation;
+import com.i0.talent.domain.enums.EmployeeStatus;
+import com.i0.talent.domain.exception.DomainException;
+import com.i0.talent.domain.repository.EmployeeRepository;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
+
+/**
+ * 获取员工详情UseCase测试
+ *
+ * 测试员工详情查看的业务逻辑
+ * 遵循TDD开发规范：Red-Green-Refactor
+ */
+@ExtendWith(MockitoExtension.class)
+@DisplayName("GetEmployeeDetailUseCase测试")
+class GetEmployeeDetailUseCaseTest {
+
+    @Mock
+    private EmployeeRepository employeeRepository;
+
+    @Mock
+    private AccessControlService accessControlService;
+
+    @Mock
+    private LegalComplianceService legalComplianceService;
+
+    private GetEmployeeDetailUseCase getEmployeeDetailUseCase;
+
+    @BeforeEach
+    void setUp() {
+        getEmployeeDetailUseCase = new GetEmployeeDetailUseCase(employeeRepository, accessControlService, legalComplianceService);
+    }
+
+    @Test
+    @DisplayName("应该成功获取员工详情（带权限控制）")
+    void should_GetEmployeeDetail_When_ValidRequestWithAuth() {
+        // Given
+        String employeeId = "emp-001";
+        String userId = "user-123";
+        String userRole = "HR";
+
+        Employee employee = Employee.reconstruct(
+                employeeId,
+                "张三",
+                "EMP001",
+                "北京",
+                "中国",
+                "zhangsan@example.com",
+                "技术部",
+                "软件工程师",
+                LocalDate.now().minusMonths(6),
+                null,
+                DataLocation.NINGXIA,
+                EmployeeStatus.ACTIVE,
+                "client-001"
+        );
+
+        when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(employee));
+        when(accessControlService.checkAccessPermission(eq(employee), eq(userId), eq(userRole), any(LocalDateTime.class)))
+                .thenReturn(true);
+
+        // When
+        EmployeeDetailOutput result = getEmployeeDetailUseCase.execute(employeeId, userId, userRole);
+
+        // Then
+        assertNotNull(result);
+        assertEquals(employeeId, result.getId());
+        assertEquals("张三", result.getName());
+        assertEquals("EMP001", result.getEmployeeNumber());
+        assertEquals(DataLocation.NINGXIA.name(), result.getDataLocation());
+        assertEquals(EmployeeStatus.ACTIVE.name(), result.getStatus());
+        assertTrue(result.getActive());
+        assertEquals(Integer.valueOf(0), result.getWorkYears()); // 刚入职6个月，工作年限为0
+
+        // 验证Repository调用
+        verify(employeeRepository, times(1)).findById(employeeId);
+        verify(accessControlService, times(1)).checkAccessPermission(eq(employee), eq(userId), eq(userRole), any(LocalDateTime.class));
+        verify(accessControlService, times(1)).logAccessSuccess(employeeId, userId, userRole);
+    }
+
+    @Test
+    @DisplayName("应该成功获取员工详情（无权限控制）")
+    void should_GetEmployeeDetail_When_ValidRequestWithoutAuth() {
+        // Given
+        String employeeId = "emp-002";
+
+        Employee employee = Employee.reconstruct(
+                employeeId,
+                "李四",
+                "EMP002",
+                "上海",
+                "中国",
+                "lisi@example.com",
+                "市场部",
+                "市场专员",
+                LocalDate.now().minusYears(2),
+                null,
+                DataLocation.SINGAPORE,
+                EmployeeStatus.ACTIVE
+        );
+
+        when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(employee));
+
+        // When
+        EmployeeDetailOutput result = getEmployeeDetailUseCase.execute(employeeId);
+
+        // Then
+        assertNotNull(result);
+        assertEquals(employeeId, result.getId());
+        assertEquals("李四", result.getName());
+        assertEquals("EMP002", result.getEmployeeNumber());
+        assertEquals(DataLocation.SINGAPORE.name(), result.getDataLocation());
+        assertEquals(EmployeeStatus.ACTIVE.name(), result.getStatus());
+        assertTrue(result.getActive());
+        assertEquals(Integer.valueOf(2), result.getWorkYears()); // 工作满2年
+
+        // 验证Repository调用
+        verify(employeeRepository, times(1)).findById(employeeId);
+        verify(accessControlService, never()).checkAccessPermission(any(Employee.class), anyString(), anyString(), any(LocalDateTime.class));
+        verify(accessControlService, never()).logAccessSuccess(anyString(), anyString(), anyString());
+    }
+
+    @Test
+    @DisplayName("应该抛出异常当员工不存在")
+    void should_ThrowException_When_EmployeeNotFound() {
+        // Given
+        String nonExistentId = "emp-999";
+        String userId = "user-123";
+        String userRole = "ADMIN";
+
+        when(employeeRepository.findById(nonExistentId)).thenReturn(Optional.empty());
+
+        // When & Then
+        DomainException exception = assertThrows(
+                DomainException.class,
+                () -> getEmployeeDetailUseCase.execute(nonExistentId, userId, userRole)
+        );
+
+        assertEquals("员工不存在: " + nonExistentId, exception.getMessage());
+
+        verify(employeeRepository, times(1)).findById(nonExistentId);
+        verify(accessControlService, never()).checkAccessPermission(any(Employee.class), anyString(), anyString(), any(LocalDateTime.class));
+    }
+
+    @Test
+    @DisplayName("应该抛出异常当没有访问权限")
+    void should_ThrowException_When_NoAccessPermission() {
+        // Given
+        String employeeId = "emp-003";
+        String userId = "user-456";
+        String userRole = "EMPLOYEE"; // 普通员工无权限
+
+        Employee employee = Employee.reconstruct(
+                employeeId,
+                "王五",
+                "EMP003",
+                "深圳",
+                "中国",
+                "wangwu@example.com",
+                "技术部",
+                "软件工程师",
+                LocalDate.now().minusMonths(3),
+                null,
+                DataLocation.GERMANY, // 德国数据更敏感
+                EmployeeStatus.ACTIVE
+        );
+
+        when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(employee));
+        when(accessControlService.checkAccessPermission(eq(employee), eq(userId), eq(userRole), any(LocalDateTime.class)))
+                .thenReturn(false); // 无权限
+
+        // When & Then
+        DomainException exception = assertThrows(
+                DomainException.class,
+                () -> getEmployeeDetailUseCase.execute(employeeId, userId, userRole)
+        );
+
+        assertEquals("您没有权限查看此员工详情", exception.getMessage());
+
+        verify(employeeRepository, times(1)).findById(employeeId);
+        verify(accessControlService, times(1)).checkAccessPermission(eq(employee), eq(userId), eq(userRole), any(LocalDateTime.class));
+        verify(accessControlService, times(1)).logAccessDenied(employeeId, userId, userRole, "无访问权限");
+        verify(accessControlService, never()).logAccessSuccess(anyString(), anyString(), anyString());
+    }
+
+    @Test
+    @DisplayName("应该正确计算离职员工的工作年限")
+    void should_CalculateWorkYearsCorrectly_When_EmployeeIsTerminated() {
+        // Given
+        String employeeId = "emp-004";
+
+        Employee employee = Employee.reconstruct(
+                employeeId,
+                "赵六",
+                "EMP004",
+                "广州",
+                "中国",
+                "zhaoliu@example.com",
+                "财务部",
+                "会计",
+                LocalDate.now().minusYears(3),
+                LocalDate.now().minusMonths(6), // 工作2年6个月后离职
+                DataLocation.NINGXIA,
+                EmployeeStatus.TERMINATED
+        );
+
+        when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(employee));
+
+        // When
+        EmployeeDetailOutput result = getEmployeeDetailUseCase.execute(employeeId);
+
+        // Then
+        assertNotNull(result);
+        assertEquals(employeeId, result.getId());
+        assertEquals(Integer.valueOf(2), result.getWorkYears()); // 2年6个月算作2年
+        assertEquals(LocalDate.now().minusMonths(6), result.getLeaveDate());
+        assertEquals(EmployeeStatus.TERMINATED.name(), result.getStatus());
+        assertFalse(result.getActive());
+    }
+
+    @Test
+    @DisplayName("应该正确识别敏感数据")
+    void should_IdentifySensitiveData_When_EmployeeInGermany() {
+        // Given
+        String employeeId = "emp-005";
+
+        Employee employee = Employee.reconstruct(
+                employeeId,
+                "钱七",
+                "EMP005",
+                "柏林",
+                "德国",
+                "qianqi@example.com",
+                "研发部",
+                "高级工程师",
+                LocalDate.now().minusYears(1),
+                null,
+                DataLocation.GERMANY, // 德国数据被认为是敏感的
+                EmployeeStatus.ACTIVE
+        );
+
+        when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(employee));
+
+        // When
+        EmployeeDetailOutput result = getEmployeeDetailUseCase.execute(employeeId);
+
+        // Then
+        assertNotNull(result);
+        assertEquals(employeeId, result.getId());
+        assertTrue(result.getSensitive()); // 德国数据应该标记为敏感
+        assertNotNull(result.getLegalNotice());
+        assertTrue(result.getLegalNotice().contains("GDPR"));
+    }
+
+    @Test
+    @DisplayName("应该获取访问权限描述")
+    void should_GetAccessPermissionDescription_When_ValidRequest() {
+        // Given
+        String employeeId = "emp-006";
+        String userId = "user-789";
+        String userRole = "MANAGER";
+
+        Employee employee = Employee.reconstruct(
+                employeeId,
+                "孙八",
+                "EMP006",
+                "杭州",
+                "中国",
+                "sunba@example.com",
+                "产品部",
+                "产品经理",
+                LocalDate.now().minusMonths(8),
+                null,
+                DataLocation.SINGAPORE,
+                EmployeeStatus.ACTIVE
+        );
+
+        when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(employee));
+        when(accessControlService.getAccessPermissionDescription(userRole, employee.getDataLocation()))
+                .thenReturn("具有基础访问权限，无敏感数据访问权限");
+
+        // When
+        String description = getEmployeeDetailUseCase.getAccessPermissionDescription(employeeId, userId, userRole);
+
+        // Then
+        assertNotNull(description);
+        assertEquals("具有基础访问权限，无敏感数据访问权限", description);
+
+        verify(employeeRepository, times(1)).findById(employeeId);
+        verify(accessControlService, times(1)).getAccessPermissionDescription(userRole, employee.getDataLocation());
+    }
+
+    @Test
+    @DisplayName("应该获取法律法规提示")
+    void should_GetLegalNotice_When_ValidRequest() {
+        // Given
+        String employeeId = "emp-007";
+
+        Employee employee = Employee.reconstruct(
+                employeeId,
+                "周九",
+                "EMP007",
+                "新加坡",
+                "新加坡",
+                "zhoujiu@example.com",
+                "销售部",
+                "销售经理",
+                LocalDate.now().minusYears(4),
+                null,
+                DataLocation.SINGAPORE,
+                EmployeeStatus.ACTIVE
+        );
+
+        when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(employee));
+        when(legalComplianceService.getLegalNotice(DataLocation.SINGAPORE))
+                .thenReturn("⚠️ PDPA 法规提醒:\n1. 同意原则：收集个人数据需获得数据主体同意\n...");
+
+        // When
+        String legalNotice = getEmployeeDetailUseCase.getLegalNotice(employeeId);
+
+        // Then
+        assertNotNull(legalNotice);
+        assertTrue(legalNotice.contains("PDPA"));
+
+        verify(employeeRepository, times(1)).findById(employeeId);
+        verify(legalComplianceService, times(1)).getLegalNotice(DataLocation.SINGAPORE);
+    }
+
+    @Test
+    @DisplayName("应该抛出异常当员工ID为空")
+    void should_ThrowException_When_EmployeeIdIsNull() {
+        // When & Then
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> getEmployeeDetailUseCase.execute(null)
+        );
+
+        assertEquals("员工ID不能为空", exception.getMessage());
+
+        verify(employeeRepository, never()).findById(anyString());
+    }
+
+    @Test
+    @DisplayName("应该抛出异常当用户ID为空但提供了用户角色")
+    void should_ThrowException_When_UserIdIsEmptyButUserRoleProvided() {
+        // Given
+        String employeeId = "emp-008";
+        String userId = ""; // 空用户ID
+        String userRole = "HR";
+
+        // When & Then
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> getEmployeeDetailUseCase.execute(employeeId, userId, userRole)
+        );
+
+        assertEquals("用户ID不能为空", exception.getMessage());
+
+        verify(employeeRepository, never()).findById(anyString());
+    }
+
+    @Test
+    @DisplayName("应该正确处理工作年限计算")
+    void should_CalculateWorkYearsCorrectly_When_EmployeeHasValidData() {
+        // Given
+        String employeeId = "emp-009";
+
+        Employee employee = Employee.reconstruct(
+                employeeId,
+                "吴十",
+                "EMP009",
+                "成都",
+                "中国",
+                "wushi@example.com",
+                "人事部",
+                "HR专员",
+                LocalDate.now(), // 使用当前日期作为入职日期
+                null,
+                DataLocation.NINGXIA,
+                EmployeeStatus.ACTIVE
+        );
+
+        when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(employee));
+
+        // When
+        EmployeeDetailOutput result = getEmployeeDetailUseCase.execute(employeeId);
+
+        // Then
+        assertNotNull(result);
+        assertEquals(employeeId, result.getId());
+        assertEquals(Integer.valueOf(0), result.getWorkYears()); // 刚入职，工作年限为0
+    }
+}

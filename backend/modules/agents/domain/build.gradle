@@ -1,0 +1,43 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Agents Domain Layer - Core business logic for AI chat and function calling'
+
+dependencies {
+    // Frameworks dependency
+    implementation project(':frameworks:domain.core')
+
+    // Lombok for reducing boilerplate code
+    compileOnly "org.projectlombok:lombok:${lombokVersion}"
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+
+    // Logging
+    implementation 'org.slf4j:slf4j-api'
+
+    // Testing dependencies
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation 'org.mockito:mockito-core'
+    testImplementation 'org.mockito:mockito-junit-jupiter'
+    testImplementation 'org.assertj:assertj-core'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // Lombok for tests
+    testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
+    testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+}
+
+// Domain layer should not depend on Spring frameworks
+configurations.all {
+    exclude group: 'org.springframework'
+    exclude group: 'org.springframework.boot'
+    exclude group: 'org.springframework.data'
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events 'passed', 'skipped', 'failed'
+        exceptionFormat 'full'
+    }
+}

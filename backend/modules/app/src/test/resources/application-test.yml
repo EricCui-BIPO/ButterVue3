@@ -1,0 +1,90 @@
+# 统一集成测试环境配置
+spring:
+  # Spring Cloud配置 - 测试环境禁用
+  cloud:
+    config:
+      enabled: false
+    discovery:
+      enabled: false
+
+  # 允许Bean定义覆盖
+  main:
+    allow-bean-definition-overriding: true
+
+  # 数据源配置 - 使用H2内存数据库进行测试
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=MySQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  # H2数据库控制台配置（仅测试环境）
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+  # JPA配置
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        format_sql: true
+
+  # Flyway配置 - 测试环境禁用，使用schema.sql代替
+  flyway:
+    enabled: true
+    locations: classpath:db/migration/h2     # 默认路径
+    clean-disabled: false                 # 允许清空数据库
+    placeholders:
+      dbtype: h2
+
+#  # SQL初始化配置
+#  sql:
+#    init:
+#      mode: always
+#      schema-locations: classpath:schema.sql
+
+# MyBatis-Plus配置
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    map-underscore-to-camel-case: true
+  global-config:
+    db-config:
+      id-type: assign_uuid
+      logic-delete-field: is_deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+    banner: false
+  mapper-locations: classpath*:mapper/**/*.xml
+  type-aliases-package: com.i0.*.gateway.dos
+
+# MyBatis Mapper扫描配置
+mybatis:
+  mapper-locations: classpath*:mapper/**/*.xml
+  type-aliases-package: com.i0.*.gateway.dos
+
+# 日志配置
+logging:
+  level:
+    com.i0: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.test: DEBUG
+    com.baomidou.mybatisplus: DEBUG
+    org.flywaydb: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# 管理端点配置（测试环境）
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
